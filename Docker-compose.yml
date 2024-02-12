@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+
+  mysql:
+    image: mysql:5.7
+    env_file:
+      - ./env/app.env
+
+  opportunitycompass:
+    build: .
+    environment:
+      - DOCKER_API_VERSION=1.43
+    ports:
+      - 8100:8000 # Change 8000 to the desired port (8100 in this example)
+    volumes:
+      - './:/app'
+    depends_on:
+      - mysql
+    container_name: OpportunityCompassApi
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+    volumes:
+      - ./:/app
