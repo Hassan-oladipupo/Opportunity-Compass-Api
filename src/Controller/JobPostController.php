@@ -149,4 +149,78 @@ class JobPostController extends AbstractController
             return $this->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
+
+
+
+    //search for jobs 
+    #[Route('/search', name: 'app_job_search', methods: ['GET'])]
+    public function searchJobs(Request $request, JobPostRepository $jobPostRepository, LoggerInterface $logger): JsonResponse
+    {
+        try {
+            $keyword = $request->query->get('keyword');
+            $location = $request->query->get('location');
+            $category = $request->query->get('category');
+            $jobDescription = $request->query->get('job_description');
+            $jobRequirement = $request->query->get('job_requirement');
+            $createdDate = $request->query->get('created_date');
+
+            $validationErrors = [];
+            if ($keyword !== null && !is_string($keyword)) {
+                $validationErrors[] = 'Keyword must be a string.';
+            }
+            if ($location !== null && !is_string($location)) {
+                $validationErrors[] = 'Location must be a string.';
+            }
+            if ($category !== null && !is_string($category)) {
+                $validationErrors[] = 'Category must be a string.';
+            }
+            if ($jobDescription !== null && !is_string($jobDescription)) {
+                $validationErrors[] = 'Job description must be a string.';
+            }
+            if ($jobRequirement !== null && !is_string($jobRequirement)) {
+                $validationErrors[] = 'Job requirement must be a string.';
+            }
+            if ($createdDate !== null && !strtotime($createdDate)) {
+                $validationErrors[] = 'Created date must be a valid date string.';
+            }
+
+            if (!empty($validationErrors)) {
+                return $this->json(['message' => 'Validation errors', 'errors' => $validationErrors], 400);
+            }
+
+            $jobPosts = $jobPostRepository->findByCriteria([
+                'keyword' => $keyword,
+                'location' => $location,
+                'category' => $category,
+                'jobDescription' => $jobDescription,
+                'jobRequirement' => $jobRequirement,
+                'createdDate' => $createdDate
+            ]);
+
+
+            $data = $this->serializeJobPosts($jobPosts);
+
+            return new JsonResponse($data, 200);
+        } catch (\Exception $e) {
+            $logger->error('An error occurred during job search: ' . $e->getMessage());
+
+            return $this->json(['message' => 'An error occurred during job search.'], 500);
+        }
+    }
+
+    private function serializeJobPosts(array $jobPosts): array
+    {
+        $serializedJobPosts = [];
+        foreach ($jobPosts as $jobPost) {
+            $serializedJobPosts[] = [
+                'jobTitle' => $jobPost->getJobTitle(),
+                'jobDescription' => $jobPost->getJobDescription(),
+                'jobLocation' => $jobPost->getJobLocation(),
+                'jobRequirement' => $jobPost->getJobRequirement(),
+                'jobCategory' => $jobPost->getJobCategory(),
+                'createdate' => $jobPost->getCreatedate()->format('Y-m-d H:i:s'),
+            ];
+        }
+        return $serializedJobPosts;
+    }
 }

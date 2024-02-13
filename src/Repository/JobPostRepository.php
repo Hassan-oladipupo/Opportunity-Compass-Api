@@ -39,6 +39,48 @@ class JobPostRepository extends ServiceEntityRepository
         }
     }
 
+    public function findByCriteria(array $criteria): array
+    {
+        $queryBuilder = $this->createQueryBuilder('jp');
+
+
+
+        if (isset($criteria['keyword'])) {
+            $queryBuilder->andWhere('jp.jobTitle LIKE :keyword OR jp.jobDescription LIKE :keyword')
+                ->setParameter('keyword', '%' . $criteria['keyword'] . '%');
+        }
+
+
+        if (isset($criteria['jobTitle'])) {
+            $queryBuilder->andWhere('jp.jobTitle LIKE :jobTitle')
+                ->setParameter('jobTitle', '%' . $criteria['jobTitle'] . '%');
+        }
+
+        if (isset($criteria['location'])) {
+            $queryBuilder->andWhere('jp.jobLocation = :location')
+                ->setParameter('location', $criteria['location']);
+        }
+
+        if (isset($criteria['jobRequirement'])) {
+            $queryBuilder->andWhere('jp.jobRequirement = :jobRequirement')
+                ->setParameter('jobRequirement', $criteria['jobRequirement']);
+        }
+
+        if (isset($criteria['category'])) {
+            $queryBuilder->andWhere('jp.jobCategory = :category')
+                ->setParameter('category', $criteria['category']);
+        }
+
+        if (isset($criteria['createdate'])) {
+            $queryBuilder->andWhere('jp.createdate = :createdate')
+                ->setParameter('createdDate', $criteria['createdate']);
+        }
+
+
+        return $queryBuilder->getQuery()->getResult();
+    }
+
+
 
 
     //    /**
