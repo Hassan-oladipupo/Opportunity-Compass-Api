@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\JobPost;
 use Psr\Log\LoggerInterface;
 use App\Repository\JobPostRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,6 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class JobPostController extends AbstractController
 {
@@ -30,7 +32,7 @@ class JobPostController extends AbstractController
     {
 
         if (!$security->getUser()) {
-            return $this->json(['message' => 'Non-logged-in users are not allowed to add jobs.'], 403);
+            return $this->json(['message' => 'You must be logged in to add a job.'], 403);
         }
 
         try {
@@ -83,11 +85,11 @@ class JobPostController extends AbstractController
 
     //Edit job 
     #[Route('/edit/{job}', name: 'app_edit_job_edit', methods: ['PUT'])]
-    public function editBlog(JobPost $job, Request $request, JobPostRepository $repo, SerializerInterface $serializer, ValidatorInterface $validator, LoggerInterface $logger, Security $security): JsonResponse
+    public function editJob(JobPost $job, Request $request, JobPostRepository $repo, SerializerInterface $serializer, ValidatorInterface $validator, LoggerInterface $logger, Security $security): JsonResponse
     {
 
         if (!$security->getUser()) {
-            return $this->json(['message' => 'Non-logged-in users are not allowed to edit jobs.'], 403);
+            return $this->json(['message' => 'You must be logged in to edit a job post.'], 403);
         }
 
         $data = $request->getContent();
@@ -114,6 +116,37 @@ class JobPostController extends AbstractController
         } catch (\Exception $e) {
             $logger->error('An error occurred: ' . $e->getMessage());
             return $this->json(['message' => 'An error occurred' . $e->getMessage()], 500);
+        }
+    }
+
+
+    //Delete a job
+
+    #[Route('/delete/{id}', name: 'app_delete_job', methods: ['DELETE'])]
+    public function deleteJob(int $id, JobPostRepository $repo, security $security, EntityManagerInterface $entityManager,): JsonResponse
+    {
+        if (!$security->getUser()) {
+            return $this->json(['message' => 'You must be logged in to delete a job post.'], 403);
+        }
+        try {
+            $jobPost = $repo->find($id);
+
+            if (!$jobPost) {
+                return $this->json(['message' => 'Job post not found.'], 404);
+            }
+
+            if ($jobPost->getUser() !== $this->getUser()) {
+                return $this->json(['message' => 'You are not authorized to delete this job post.'], 403);
+            }
+
+            $entityManager->remove($jobPost);
+            $entityManager->flush();
+
+            return $this->json(['message' => 'Job post deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            $this->logger->error('An error occurred: ' . $e->getMessage());
+
+            return $this->json(['message' => 'An error occurred: ' . $e->getMessage()], 500);
         }
     }
 }
