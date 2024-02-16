@@ -57,10 +57,14 @@ class JobPost
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: JobPost::class, orphanRemoval: true)]
     private Collection $jobPosts;
 
+    #[ORM\OneToMany(mappedBy: 'relatedJobPost', targetEntity: ApplicationForm::class)]
+    private Collection $relatedApplicationForms;
+
     public function __construct()
     {
         $this->jobPosts = new ArrayCollection();
         $this->createdate = new DateTime();
+        $this->relatedApplicationForms = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -178,6 +182,36 @@ class JobPost
                 $jobPost->setUser(null);
             }
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection|ApplicationForm[]
+     */
+    public function getRelatedApplicationForms(): Collection
+    {
+        return $this->relatedApplicationForms;
+    }
+
+    public function addRelatedApplicationForm(ApplicationForm $applicationForm): self
+    {
+        if (!$this->relatedApplicationForms->contains($applicationForm)) {
+            $this->relatedApplicationForms[] = $applicationForm;
+            $applicationForm->setRelatedJobPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRelatedApplicationForm(ApplicationForm $applicationForm): self
+    {
+        if ($this->relatedApplicationForms->removeElement($applicationForm)) {
+            // set the owning side to null (unless already changed)
+            if ($applicationForm->getRelatedJobPost() === $this) {
+                $applicationForm->setRelatedJobPost(null);
+            }
+        }
+
         return $this;
     }
 }

@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ApplicationFormRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ApplicationFormRepository::class)]
@@ -17,60 +18,75 @@ class ApplicationForm
     private ?int $id = null;
 
     //Personal Information
-    #[Assert\NotBlank(message: 'This field is required.')]
+
+    #[Assert\NotBlank(message: 'Full Name field is required.')]
+    #[Groups("applicationForm")]
     #[ORM\Column(length: 255)]
     private ?string $fullName = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Email field is required.')]
+    #[Groups("applicationForm")]
     #[ORM\Column(length: 255)]
     private ?string $Email = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Phone number field is required.')]
+    #[Groups("applicationForm")]
     #[ORM\Column(length: 255)]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("applicationForm")]
     private ?string $Address = null;
 
     //Job Information
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Please add the position you are applying for.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $applyingPostion = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Please add your expected salary.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $desiredSalary = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Pleas add your years of experience.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $yearOfExperience = null;
 
     //Education
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Qualification  field is required.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $Qualification = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'please add your field of study.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $fieldOfStudy = null;
 
 
 
     //Skills & Qualifications:
     #[ORM\Column(length: 500, nullable: true)]
+    #[Groups("applicationForm")]
     private ?string $relevantSkills = null;
 
     //Uploads
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("applicationForm")]
     private ?string $coverLetter = null;
 
-    #[Assert\NotBlank(message: 'This field is required.')]
+    #[Assert\NotBlank(message: 'Please upload your resume.')]
     #[ORM\Column(length: 255)]
+    #[Groups("applicationForm")]
     private ?string $resume = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups("applicationForm")]
     private ?User $applicant;
+
 
     #[ORM\ManyToOne(targetEntity: JobPost::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -82,8 +98,7 @@ class ApplicationForm
 
     public function __construct()
     {
-        $this->relatedJobPost = new ArrayCollection();
-        $this->applicant = new ArrayCollection();
+
         $this->createdate = new DateTime();
     }
 
@@ -141,12 +156,12 @@ class ApplicationForm
         return $this;
     }
 
-    public function getApplyingPostion(): ?string
+    public function getApplyingPosition(): ?string
     {
         return $this->applyingPostion;
     }
 
-    public function setApplyingPostion(string $applyingPostion): static
+    public function setApplyingPosition(string $applyingPostion): static
     {
         $this->applyingPostion = $applyingPostion;
 
@@ -252,9 +267,11 @@ class ApplicationForm
         return $this->relatedJobPost;
     }
 
-    public function setRelatedJobPost(?JobPost $relatedJobPost): void
+    public function setRelatedJobPost(?JobPost $relatedJobPost): self
     {
         $this->relatedJobPost = $relatedJobPost;
+
+        return $this;
     }
     public function getCreatedate(): ?\DateTimeInterface
     {
