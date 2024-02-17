@@ -50,7 +50,9 @@ class JobPostController extends AbstractController
             }
 
 
-
+            if ($jobPost->getUser() !== $this->getUser()) {
+                return $this->json(['message' => 'You are not authorized to add a job post.'], 403);
+            }
             $jobPost->setUser($this->getUser());
 
             $repo->save($jobPost, true);
@@ -109,6 +111,9 @@ class JobPostController extends AbstractController
                 }
 
                 return $this->json(['errors' => $errorMessages], 422);
+            }
+            if ($editJobPost->getUser() !== $this->getUser()) {
+                return $this->json(['message' => 'You are not authorized to edit a job post.'], 403);
             }
             $repo->save($editJobPost, true);
             $jsonResponse = $this->json($editJobPost, 200, [], ['groups' => 'jobPost']);
