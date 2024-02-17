@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\JobPost;
 use Psr\Log\LoggerInterface;
 use App\Entity\ApplicationForm;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\ApplicationFormRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Security;
@@ -22,10 +23,12 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 class ApplicationFormController extends AbstractController
 {
     private $logger;
+    private $entityManager;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, EntityManagerInterface $entityManager)
     {
         $this->logger = $logger;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/submit/{job}', name: 'app_application_form_controller', methods: ['POST'])]
@@ -113,7 +116,12 @@ class ApplicationFormController extends AbstractController
             }
 
             // Save application form entity
-            $repo->save($applicationForm);
+            // $repo->save($applicationForm);
+            $this->entityManager->persist($applicationForm);
+            $this->entityManager->flush();
+
+
+
 
             return $this->json(['message' => 'Application  submitted successfully.'], Response::HTTP_CREATED);
         } catch (\Exception $e) {

@@ -30,6 +30,8 @@ class ApplicationFormRepository extends ServiceEntityRepository
         }
     }
 
+
+
     public function remove(ApplicationForm $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
