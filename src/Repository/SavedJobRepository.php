@@ -38,23 +38,18 @@ class SavedJobRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
-
-    /**
-     * Get the saved jobs for a specific user based on their user ID.
-     *
-     * @param int $userId The ID of the user
-     * @return array|null The saved jobs for the user
-     */
-    public function findSavedJobsByUserId(string $userId): array
+    public function findSavedJobsByUserId(int $userId): array
     {
         return $this->createQueryBuilder('sj')
+            ->select('sj')
             ->join('sj.user', 'u')
             ->where('u.id = :userId')
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getResult();
     }
+
+
     //    /**
     //     * @return SavedJob[] Returns an array of SavedJob objects
     //     */

@@ -78,7 +78,7 @@ class SavedJobController extends AbstractController
             return $this->json(['message' => 'You must be logged in to retrieve saved jobs.'], 403);
         }
 
-        $savedJobs = $savedJobRepository->findSavedJobsByUserId($currentUser->getUserIdentifier());
+        $savedJobs = $savedJobRepository->findSavedJobsByUserId($currentUser->getId());
 
         $savedJobsData = [];
         foreach ($savedJobs as $savedJob) {

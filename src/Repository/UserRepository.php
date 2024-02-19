@@ -39,17 +39,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
-
-    public function findUserSavedJobs(User $user): array
+    public function findUserSavedJobs(int $id): array
     {
         return $this->createQueryBuilder('u')
-            ->select('u, sj')
             ->leftJoin('u.savedJobs', 'sj')
-            ->where('u.id = :user_id')
-            ->setParameter('user_id', $user->getId())
+            ->addSelect('sj')
+            ->leftJoin('sj.jobPost', 'jp')
+            ->addSelect('jp')
+            ->where('u.id = :userId')
+            ->setParameter('userId', $id)
             ->getQuery()
             ->getResult();
     }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */
