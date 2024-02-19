@@ -60,11 +60,15 @@ class JobPost
     #[ORM\OneToMany(mappedBy: 'relatedJobPost', targetEntity: ApplicationForm::class)]
     private Collection $relatedApplicationForms;
 
+    #[ORM\OneToMany(mappedBy: 'JobPost', targetEntity: SavedJob::class)]
+    private Collection $savedJobs;
+
     public function __construct()
     {
         $this->jobPosts = new ArrayCollection();
         $this->createdate = new DateTime();
         $this->relatedApplicationForms = new ArrayCollection();
+        $this->savedJobs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -209,6 +213,36 @@ class JobPost
             // set the owning side to null (unless already changed)
             if ($applicationForm->getRelatedJobPost() === $this) {
                 $applicationForm->setRelatedJobPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SavedJob>
+     */
+    public function getSavedJobs(): Collection
+    {
+        return $this->savedJobs;
+    }
+
+    public function addSavedJob(SavedJob $savedJob): static
+    {
+        if (!$this->savedJobs->contains($savedJob)) {
+            $this->savedJobs->add($savedJob);
+            $savedJob->setJobPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSavedJob(SavedJob $savedJob): static
+    {
+        if ($this->savedJobs->removeElement($savedJob)) {
+            // set the owning side to null (unless already changed)
+            if ($savedJob->getJobPost() === $this) {
+                $savedJob->setJobPost(null);
             }
         }
 

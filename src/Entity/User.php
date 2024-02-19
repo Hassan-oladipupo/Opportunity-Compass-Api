@@ -50,9 +50,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["user:read"])]
     private Collection $jobPosts;
 
+    #[ORM\OneToMany(mappedBy: 'User', targetEntity: SavedJob::class, orphanRemoval: true)]
+    private Collection $savedJobs;
+
     public function __construct()
     {
         $this->jobPosts = new ArrayCollection();
+        $this->savedJobs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -195,6 +199,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->userProfile = $userProfile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SavedJob>
+     */
+    public function getSavedJobs(): Collection
+    {
+        return $this->savedJobs;
+    }
+
+    
+
+
+    public function addSavedJob(SavedJob $savedJob): static
+    {
+        if (!$this->savedJobs->contains($savedJob)) {
+            $this->savedJobs->add($savedJob);
+            $savedJob->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSavedJob(SavedJob $savedJob): static
+    {
+        if ($this->savedJobs->removeElement($savedJob)) {
+            // set the owning side to null (unless already changed)
+            if ($savedJob->getUser() === $this) {
+                $savedJob->setUser(null);
+            }
+        }
 
         return $this;
     }
