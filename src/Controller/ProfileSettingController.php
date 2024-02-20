@@ -2,13 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\JobPost;
 use DateTime;
 use App\Entity\User;
 use App\Entity\UserProfile;
+use App\Repository\UserProfileRepository;
 use Psr\Log\LoggerInterface;
 use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\File;
@@ -38,8 +41,15 @@ class ProfileSettingController extends AbstractController
         SerializerInterface $serializer,
         ValidatorInterface $validator,
         ManagerRegistry $doctrine,
-        SluggerInterface $slugger
+        SluggerInterface $slugger,
+        Security $security,
     ): JsonResponse {
+
+        if (!$security->getUser()) {
+            return $this->json(['message' => 'Please sign in to set up your profile.'], 403);
+        }
+
+
         try {
             /** @var User $user */
             $user = $this->getUser();
@@ -95,6 +105,35 @@ class ProfileSettingController extends AbstractController
             return new JsonResponse(['message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    //Retrieve user account setting
+    #[Route('/settings/profile', name: 'app_settings_retrieve_profile', methods: ['GET'])]
+    public function getProfile(SerializerInterface $serializer, Security $security): JsonResponse
+    {
+        if (!$security->getUser()) {
+            return $this->json(['message' => 'Please sign in to retrieve your profile.'], 403);
+        }
+
+        try {
+            /** @var User $user */
+            $user = $this->getUser();
+            $getUserProfile = $user->getUserProfile();
+
+            if (!$getUserProfile) {
+                return $this->json(['message' => 'User profile not found. Please set up your profile.'], Response::HTTP_NOT_FOUND);
+            }
+
+
+            $serializedProfile = $serializer->serialize($getUserProfile, 'json', ['groups' => 'userProfile']);
+
+            return new JsonResponse($serializedProfile, Response::HTTP_OK, [], true);
+        } catch (\Exception $e) {
+            $this->logger->error('An error occurred: ' . $e->getMessage());
+            return new JsonResponse(['message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //set profile image
 
     #[Route('/settings/profile-image', name: 'app_settings_profile_image', methods: ['POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]

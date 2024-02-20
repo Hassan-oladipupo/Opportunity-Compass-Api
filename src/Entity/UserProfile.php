@@ -6,6 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserProfileRepository;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserProfileRepository::class)]
 class UserProfile
@@ -13,36 +14,48 @@ class UserProfile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("userProfile")]
     private ?int $id = null;
 
+
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("userProfile")]
     private ?string $name = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("userProfile")]
     private ?string $websiteUrl = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("userProfile")]
     private ?string $company = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("userProfile")]
     private ?string $location = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups("userProfile")]
     private ?\DateTimeInterface $dateOfBirth = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("userProfile")]
     private ?string $Image = null;
 
 
     #[Assert\NotBlank(message: 'Please upload your resume.')]
     #[ORM\Column(length: 255)]
+    #[Groups("userProfile")]
     private ?string $resume = null;
 
     #[ORM\OneToOne(inversedBy: 'userProfile', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+    #[ORM\ManyToOne(targetEntity: JobPost::class, inversedBy: "savedJobs")]
+    #[ORM\JoinColumn(nullable: false)]
+    private $jobPost;
 
 
 
@@ -147,6 +160,18 @@ class UserProfile
     public function setUser(User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getJobPost(): ?JobPost
+    {
+        return $this->jobPost;
+    }
+
+    public function setJobPost(?JobPost $jobPost): static
+    {
+        $this->jobPost = $jobPost;
 
         return $this;
     }

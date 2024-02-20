@@ -41,6 +41,21 @@ class UserProfileRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Find job applications for a given user ID.
+     *
+     * @param int $userId The ID of the user
+     * @return array|null The job applications for the user
+     */
+    public function findJobApplicationsByUserId(int $userId): ?array
+    {
+        return $this->createQueryBuilder('ja')
+            ->join('ja.user', 'u')
+            ->andWhere('u.id = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return UserProfile[] Returns an array of UserProfile objects
     //     */

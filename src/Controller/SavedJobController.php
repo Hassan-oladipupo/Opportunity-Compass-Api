@@ -70,6 +70,9 @@ class SavedJobController extends AbstractController
         }
     }
 
+
+    //Retrieved saved job
+
     #[Route('/jobs/saved', name: 'get_saved_jobs', methods: ['GET'])]
     public function getSavedJobs(Security $security, SavedJobRepository $savedJobRepository): JsonResponse
     {
