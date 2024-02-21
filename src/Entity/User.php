@@ -43,6 +43,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $confirmationToken;
 
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $resetToken;
+
     #[ORM\Column(type: 'boolean')]
     private bool $confirmed = false;
 
@@ -211,7 +215,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->savedJobs;
     }
 
-    
+
 
 
     public function addSavedJob(SavedJob $savedJob): static
@@ -234,5 +238,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): void
+    {
+        $this->resetToken = $resetToken;
     }
 }

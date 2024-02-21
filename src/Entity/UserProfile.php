@@ -53,9 +53,7 @@ class UserProfile
     #[ORM\OneToOne(inversedBy: 'userProfile', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
-    #[ORM\ManyToOne(targetEntity: JobPost::class, inversedBy: "savedJobs")]
-    #[ORM\JoinColumn(nullable: false)]
-    private $jobPost;
+
 
 
 
@@ -160,18 +158,6 @@ class UserProfile
     public function setUser(User $user): static
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getJobPost(): ?JobPost
-    {
-        return $this->jobPost;
-    }
-
-    public function setJobPost(?JobPost $jobPost): static
-    {
-        $this->jobPost = $jobPost;
 
         return $this;
     }
