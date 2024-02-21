@@ -23,7 +23,6 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class ForgetPasswordController extends AbstractController
 {
-    //Login 
 
     private $logger;
     private $entityManager;
@@ -61,17 +60,14 @@ class ForgetPasswordController extends AbstractController
             return new JsonResponse(['message' => 'Invalid email format.'], 400);
         }
 
-        // Retrieve user by email
         $user = $repo->findOneBy(['username' => $email]);
 
         if (!$user) {
             return $this->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
-        // Generate reset token
         $resetToken = md5(uniqid());
 
-        // Set reset token and token expiry in user entity
         $user->setResetToken($resetToken);
 
         $this->entityManager->persist($user);
@@ -80,10 +76,8 @@ class ForgetPasswordController extends AbstractController
 
         try {
 
-            // Send reset password email
             $resetUrl = $this->generateUrl('reset_password', ['token' => $resetToken], UrlGeneratorInterface::ABSOLUTE_URL);
 
-            // Create and send reset password email
             $sendgridApiKey = $_ENV['SENDGRID_API_KEY'];
             $sendgrid = new SendGrid($sendgridApiKey);
 
